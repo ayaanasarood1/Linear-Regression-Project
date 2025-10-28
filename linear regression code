@@ -1,0 +1,68 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+DATA_PATH = "student_scores_integer.csv"
+COL_X = "StudyHours"   # feature column name
+COL_Y = "Score"        # label column name
+alpha = 0.0001           # learning rate
+epochs = 2000          # number of gradient steps
+
+data = pd.read_csv(DATA_PATH)
+
+# get columns
+x = data[COL_X].astype(float)
+y = data[COL_Y].astype(float)
+m = x.shape[0]
+
+#standardize x
+x_mean = np.mean(x)
+x_std = np.std(x)
+x_scaled = (x - x_mean) / x_std
+
+# initialize parameters
+theta0 = 0
+theta1 = 0
+
+# cost
+def cost(theta0, theta1, x, y):
+    y_hat = theta0 + theta1 * x
+    errors = y_hat - y
+    return np.dot(errors, errors) / (2 * m)
+
+# track costsm
+costs = [cost(theta0, theta1, x, y)]
+
+# gradient descent loop
+for i in range(epochs):
+    y_hat = theta0 + theta1 * x
+    errors = y_hat - y
+    grad_theta0 = (1 / m) * np.sum(errors)
+    grad_theta1 = (1 / m) * np.sum(errors * x)
+    theta0 = theta0 - alpha * grad_theta0
+    theta1 = theta1 - alpha * grad_theta1
+    costs.append(cost(theta0, theta1, x, y))
+
+print("theta0_final =", theta0)
+print("theta1_final =", theta1)
+print("J_start      =", costs[0])
+print("J_final      =", costs[-1])
+
+# 1) regression line
+plt.figure()
+plt.scatter(x, y)
+x_min = float(x.min())
+x_max = float(x.max())
+x_line = np.array([x_min, x_max])
+y_line = theta0 + theta1 * x_line
+plt.plot(x_line, y_line)
+plt.xlabel(COL_X)
+plt.ylabel(COL_Y)
+plt.title("Regression Line")
+
+# 2) cost vs iterations
+plt.figure()
+plt.plot(range(len(costs)), np.array(costs))
+plt.xlabel("Iteration")
+plt.ylabel("Cost J")
+plt.title("Cost vs. Iterations")
